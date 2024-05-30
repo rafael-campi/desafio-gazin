@@ -1,8 +1,8 @@
-version: '3.9'
+version: '3.1'
 services:
   web:
     restart: always
-    build: ./back-end 
+    build: ./back-end
     volumes:
       - ./back-end:/var/www/
     depends_on:
@@ -39,6 +39,27 @@ services:
       - ./back-end:/var/www
     depends_on:
       - web
+    networks:
+      - app-network
+    # Serviço para a aplicação Node.js
+    
+  app:
+    build: ./front-end
+    ports:
+      - "3000:3000" # Mapeia a porta 3000 do contêiner para a porta 3000 do host
+    volumes:
+      - ./front-end/app:/app # Mapeia a pasta do código-fonte para o contêiner (opcional, dependendo da necessidade)
+
+  nginx-front:
+    build:
+      context: ./front-end
+      dockerfile: Dockerfile # Usar o Dockerfile que configura o Nginx para servir os arquivos estáticos
+    ports:
+      - "80:80" # Mapeia a porta 80 do contêiner para a porta 80 do host
+    volumes:
+      - ./front-end/.docker/nginx/default.conf:/etc/nginx/conf.d/default.conf # Mapeia o arquivo de configuração do nginx
+    depends_on:
+      - app # Garante que o contêiner do app seja iniciado antes do nginx
     networks:
       - app-network
 

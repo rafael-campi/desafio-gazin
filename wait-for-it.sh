@@ -1,0 +1,1 @@
+chmod +x back-end/wait-for-it.sh

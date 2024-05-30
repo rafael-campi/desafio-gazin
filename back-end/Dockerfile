@@ -12,15 +12,17 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 
 COPY . /var/www
+RUN mkdir -p /var/www
 COPY .env.example /var/www/.env
+
 
 #RUN chmod -R 777 /etc/hosts
 
 #RUN echo "IP_ADDRESS db" >> /etc/hosts
 
 RUN chmod -R 777 /var/www/storage
-RUN php artisan migrate
-RUN php artisan key:generate
+#RUN php artisan migrate
+#RUN php artisan key:generate
 
 EXPOSE 9000
 
