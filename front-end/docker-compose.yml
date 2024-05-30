@@ -1,0 +1,21 @@
+version: '3'
+services:
+  # Serviço para a aplicação Node.js
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"  # Mapeia a porta 3000 do contêiner para a porta 3000 do host
+    volumes:
+      - ./app:/app  # Mapeia a pasta do código-fonte para o contêiner (opcional, dependendo da necessidade)
+
+  # Serviço para o servidor nginx
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"  # Mapeia a porta 80 do contêiner para a porta 80 do host
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf  # Mapeia o arquivo de configuração do nginx
+    depends_on:
+      - app  # Garante que o contêiner do app seja iniciado antes do nginx

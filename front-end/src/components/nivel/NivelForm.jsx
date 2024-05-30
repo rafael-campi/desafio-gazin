@@ -4,16 +4,16 @@ import Form from 'react-bootstrap/Form';
 import Toast from 'react-bootstrap/Toast';
 
 function NivelForm(props) {
-    const [nivel, setNivel] = useState(props?.nivel?.nivel);
+    const [nivel, setNivel] = useState(props?.nivel?.nivel || '');
     const [botao, setBotao] = useState('Salvar');
-    const [botaoDisabled, setbotaoDisabled] = useState(false);
+    const [botaoDisabled, setBotaoDisabled] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [showError, setShowError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
     const handleSaveNivel = async () => {
         setBotao('Salvando...');
-        setbotaoDisabled(true);
+        setBotaoDisabled(true);
         try {
             let response;
             if (props?.nivel?.id) {
@@ -24,7 +24,6 @@ function NivelForm(props) {
                     },
                     body: JSON.stringify({ 'nivel': nivel }),
                 });
-                props.onSaveSuccess();
             } else {
                 response = await fetch(`${import.meta.env.VITE_API_URL}/api/niveis`, {
                     method: 'POST',
@@ -33,18 +32,30 @@ function NivelForm(props) {
                     },
                     body: JSON.stringify({ 'nivel': nivel }),
                 });
-                props.onSaveSuccess();
             }
+
+            const data = await response.json();
+            console.log(response.status);
+            if (response.status == 404) {
+                Object.entries(data.data).forEach(function ([key, value]) {
+                    throw new Error(value[0]);
+                });
+
+                throw new Error(JSON.stringify(data.data?.nivel[0]));
+            }
+
+            props.onSaveSuccess();
             setShowSuccess(true);
             setTimeout(() => setShowSuccess(false), 3000); // Fecha o Toast após 3 segundos
-
         } catch (error) {
             console.error('Erro ao salvar nível:', error);
-            setErrorMessage('Erro ao salvar nível.');
+            
+            setErrorMessage(error.message);
+            
             setShowError(true);
         }
         setBotao('Salvar');
-        setbotaoDisabled(false);
+        setBotaoDisabled(false);
     };
 
     const handleInputChange = (event) => {
@@ -53,11 +64,11 @@ function NivelForm(props) {
 
     return (
         <Form>
-            <Form.Group className="mb-3" controlId="formBasicEmail">
+            <Form.Group className="mb-3" controlId="formBasicNivel">
                 <Form.Label>Nível</Form.Label>
                 <Form.Control
                     type="text"
-                    value={nivel} // Use value ao invés de defaultValue para controlar o valor do campo
+                    value={nivel}
                     placeholder="Digite o nivel"
                     onChange={handleInputChange}
                 />

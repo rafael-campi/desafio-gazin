@@ -12,7 +12,7 @@ function ModalDefault(props) {
 
     return (
         <>
-            <Button variant={props.button} onClick={handleShow}>
+            <Button className={props?.nameClass} variant={props.button} onClick={handleShow}>
                 {props.name}
             </Button>
 

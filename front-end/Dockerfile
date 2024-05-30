@@ -1,5 +1,5 @@
 # Etapa 1: Construir a aplicação
-FROM node:18-alpine AS build
+FROM node:22-alpine AS build
 
 # Definir o diretório de trabalho
 WORKDIR /app
@@ -23,7 +23,7 @@ FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 
 # Copiar o arquivo de configuração do nginx
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY .docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 
 # Expor a porta 80
 EXPOSE 80

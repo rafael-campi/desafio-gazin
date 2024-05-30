@@ -1,0 +1,46 @@
+version: '3'
+services:
+  web:
+    restart: always
+    build: .
+    volumes:
+      - ./:/var/www/
+    depends_on:
+      - db
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: gazin
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+    networks:
+      - app-network
+
+  db:
+    image: postgres:12.0-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: gazin
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - "./.docker/dbdata:/var/lib/postgresql/data"
+    networks:
+      - app-network
+
+  nginx:
+    build: ./.docker/nginx
+    restart: always
+    ports:
+      - "8000:80"
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - web
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

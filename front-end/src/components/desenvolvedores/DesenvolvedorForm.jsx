@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
+import Toast from 'react-bootstrap/Toast';
 
 function DesenvolvedorForm(props) {
     const [desenvolvedor, setDesenvolvedor] = useState({
@@ -13,6 +14,9 @@ function DesenvolvedorForm(props) {
     const [niveis, setNiveis] = useState([]);
     const [botao, setBotao] = useState('Salvar');
     const [botaoDisabled, setBotaoDisabled] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [showError, setShowError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
         const fetchNiveis = async () => {
@@ -50,13 +54,25 @@ function DesenvolvedorForm(props) {
                     body: JSON.stringify(desenvolvedor),
                 });
             }
-            if (response.ok) {
-                props.onSaveSuccess();
-            } else {
-                console.error('Erro ao salvar desenvolvedor:', response.statusText);
+            const data = await response.json();
+            console.log(response.status);
+            if (response.status == 404) {
+                Object.entries(data.data).forEach(function ([key, value]) {
+                    throw new Error(value[0]);
+                });
+
+                throw new Error(JSON.stringify(data.data?.nivel[0]));
             }
+
+            props.onSaveSuccess();
+            setShowSuccess(true);
+            setTimeout(() => setShowSuccess(false), 3000); // Fecha o Toast após 3 segundos
         } catch (error) {
-            console.error('Erro ao salvar desenvolvedor:', error);
+            console.error('Erro ao salvar nível:', error);
+
+            setErrorMessage(error.message);
+
+            setShowError(true);
         }
         setBotao('Salvar');
         setBotaoDisabled(false);
@@ -127,7 +143,13 @@ function DesenvolvedorForm(props) {
                     ))}
                 </Form.Control>
             </Form.Group>
-            
+            <Toast show={showSuccess} onClose={() => setShowSuccess(false)} delay={3000} autohide>
+                <Toast.Body>Operação concluída com sucesso!</Toast.Body>
+            </Toast>
+            <Toast show={showError} onClose={() => setShowError(false)} delay={3000} autohide bg="danger">
+                <Toast.Body>{errorMessage}</Toast.Body>
+            </Toast>
+
             <Button variant="primary" disabled={botaoDisabled} onClick={handleSaveDesenvolvedor}>
                 {botao}
             </Button>
